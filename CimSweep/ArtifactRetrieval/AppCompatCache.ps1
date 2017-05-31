@@ -118,7 +118,7 @@ Specifies the bitness of the operating system from which the AppCompatCache byte
 
 .EXAMPLE
 
-ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArchitecture 32-bit 
+ConvertFrom-ByteArray -CacheValue $AppCompatCacheValue -OSVersion 6.1 -OSArchitecture 32-bit 
 #>
     param (
         [Parameter(Mandatory = $true)]
@@ -294,6 +294,7 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                     $null = $BinaryReader.BaseStream.Seek(6, [IO.SeekOrigin]::Current)
                     
                     $NameOffset = $BinaryReader.ReadInt64()
+                    
                     $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                     
                     $null = $BinaryReader.BaseStream.Seek(24, [IO.SeekOrigin]::Current)
@@ -334,7 +335,9 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
 
             do { # parse entries
                 $EntryPosition++
+                
                 $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes(528)).TrimEnd("`0") # 528 == MAX_PATH + 4 unicode chars
+                
                 $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                 
                 if (($LastModifiedTime.Year -eq 1600) -and !$Name) { break } # empty entries == end
