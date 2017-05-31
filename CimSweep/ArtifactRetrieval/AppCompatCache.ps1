@@ -154,16 +154,23 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
             }
 
             do { # parse entries
+                
                 $null = $BinaryReader.BaseStream.Seek(8, [IO.SeekOrigin]::Current) # padding between entries
                 
-                $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
+                $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
+
                 $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                 
                 $null = $BinaryReader.ReadBytes($BinaryReader.ReadInt32()) # skip some bytes
                 
+                if ($Name.StartsWith('0')) { # Parse AppX PackageFamilyName
+                    $Values = $Name.Split("`t")
+                    $Name = $Values[4] + '_' + $Values[5]
+                }
+
                 $ObjectProperties = [ordered] @{
                     PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                    Path = $Path
+                    Name = $Name
                     LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                 }
                 
@@ -183,7 +190,7 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
             do { # parse entries
                 $null = $BinaryReader.BaseStream.Seek(8, [IO.SeekOrigin]::Current) # padding & datasize
                 
-                $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
+                $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
 
                 $null = $BinaryReader.ReadBytes(10) # skip insertion/shim flags & padding
                 
@@ -193,7 +200,7 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                 
                 $ObjectProperties = [ordered] @{
                     PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                    Path = $Path
+                    Name = $Name
                     LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                 }
                 
@@ -212,7 +219,7 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
             do { # parse entries
                 $null = $BinaryReader.BaseStream.Seek(8, [IO.SeekOrigin]::Current) # padding & datasize
                 
-                $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
+                $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($BinaryReader.ReadUInt16()))
 
                 $null = $BinaryReader.BaseStream.Seek(10, [IO.SeekOrigin]::Current) # skip insertion/shim flags & padding
                 
@@ -222,7 +229,7 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                 
                 $ObjectProperties = [ordered] @{
                     PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                    Path = $Path
+                    Name = $Name
                     LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                 }
                 
@@ -246,11 +253,11 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                 do {
                     $EntryPosition++
                     
-                    $PathSize = $BinaryReader.ReadUInt16()
+                    $NameSize = $BinaryReader.ReadUInt16()
                     
                     $null = $BinaryReader.ReadUInt16() # MaxPathSize
                     
-                    $PathOffset = $BinaryReader.ReadInt32()
+                    $NameOffset = $BinaryReader.ReadInt32()
                     
                     $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                     
@@ -258,15 +265,15 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                     
                     $Position = $BinaryReader.BaseStream.Position
                     
-                    $null = $BinaryReader.BaseStream.Seek($PathOffset, [IO.SeekOrigin]::Begin)
+                    $null = $BinaryReader.BaseStream.Seek($NameOffset, [IO.SeekOrigin]::Begin)
                     
-                    $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($PathSize))
+                    $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($NameSize))
 
                     $null = $BinaryReader.BaseStream.Seek($Position, [IO.SeekOrigin]::Begin)
                     
                     $ObjectProperties = [ordered] @{
                         PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                        Path = $Path
+                        Name = $Name
                         LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                     }
                 
@@ -281,27 +288,27 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
                 do {
                     $EntryPosition++
                     
-                    $PathSize = $BinaryReader.ReadUInt16()
+                    $NameSize = $BinaryReader.ReadUInt16()
                     
                     # Padding
                     $null = $BinaryReader.BaseStream.Seek(6, [IO.SeekOrigin]::Current)
                     
-                    $PathOffset = $BinaryReader.ReadInt64()
+                    $NameOffset = $BinaryReader.ReadInt64()
                     $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                     
                     $null = $BinaryReader.BaseStream.Seek(24, [IO.SeekOrigin]::Current)
                     
                     $Position = $BinaryReader.BaseStream.Position
                     
-                    $null = $BinaryReader.BaseStream.Seek($PathOffset, [IO.SeekOrigin]::Begin)
+                    $null = $BinaryReader.BaseStream.Seek($NameOffset, [IO.SeekOrigin]::Begin)
                     
-                    $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($PathSize))
+                    $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes($NameSize))
 
                     $null = $BinaryReader.BaseStream.Seek($Position, [IO.SeekOrigin]::Begin)
                     
                     $ObjectProperties = [ordered] @{
                         PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                        Path = $Path
+                        Name = $Name
                         LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                     }
                 
@@ -327,16 +334,16 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
 
             do { # parse entries
                 $EntryPosition++
-                $Path = $UnicodeEncoding.GetString($BinaryReader.ReadBytes(528)).TrimEnd("`0") # 528 == MAX_PATH + 4 unicode chars
+                $Name = $UnicodeEncoding.GetString($BinaryReader.ReadBytes(528)).TrimEnd("`0") # 528 == MAX_PATH + 4 unicode chars
                 $LastModifiedTime = [DateTimeOffset]::FromFileTime($BinaryReader.ReadInt64()).DateTime
                 
-                if (($LastModifiedTime.Year -eq 1600) -and !$Path) { break } # empty entries == end
+                if (($LastModifiedTime.Year -eq 1600) -and !$Name) { break } # empty entries == end
 
                 $null = $BinaryReader.BaseStream.Seek(16, [IO.SeekOrigin]::Current) # skip some bytes
                 
                 $ObjectProperties = [ordered] @{
                     PSTypeName = 'CimSweep.AppCompatCacheEntry'
-                    Path = $Path
+                    Name = $Name
                     LastModifiedTime = $LastModifiedTime.ToUniversalTime().ToString('o')
                 }
                 
@@ -346,7 +353,6 @@ ConvertFrom-ByteArray -CacheBytes $AppCompatCacheKeyBytes -OSVersion 6.1 -OSArch
             } until ($EntryPosition -eq $NumberOfEntries)
         }
     }
-    $BinaryReader.BaseStream.Dispose()
     $BinaryReader.Dispose()
 }
 

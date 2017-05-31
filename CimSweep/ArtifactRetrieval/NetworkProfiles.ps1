@@ -74,8 +74,8 @@ Outputs objects consisting of relevant network profile information. Note: the ti
 
             $TimeZoneName = Get-CSRegistryValue @Parameters @CommonArgs
 
-            # TimeZoneKeyName doesn't exist on XP, but CimSweep still returns an object as though it did
-            # NetworkList also doesn't exist on XP, so might as well bail now.
+            # TimeZoneKeyName doesn't exist on XP, but CimSweep returns an object as though it does
+            # NetworkList also doesn't exist on XP, so might as well bail now
 
             try { $TimeZoneInfo = [TimeZoneInfo]::FindSystemTimeZoneById($TimeZoneName.ValueContent) }
             catch { break }
@@ -97,8 +97,10 @@ Outputs objects consisting of relevant network profile information. Note: the ti
                     switch ($ValueName) {
                         
                         { $_ -like "Date*" } {
+                            
+                            # This is actually faster than bitconverting byte offsets
                             $BinaryReader = New-Object IO.BinaryReader (New-Object IO.MemoryStream (,$ValueContent))
-                        
+                            
                             $Year = $BinaryReader.ReadInt16()
                             $Month = $BinaryReader.ReadInt16()
                             $null = $BinaryReader.ReadInt16() # skip week day
