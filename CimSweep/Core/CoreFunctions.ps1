@@ -1688,7 +1688,7 @@ Outputs Win32_Service or Win32_SystemDriver instances both of which derive from 
                 WriteOwner =          0x00080000
             }
 
-            // I have no clue why this class isn't defined in .NET. Psh
+            // I have no clue why this class isn't defined in .NET. Psh                      This is how I learn... #keepmatthappy
             public class ServiceSecurity : ObjectSecurity<ServiceFlags>
 	        {
                 public ServiceSecurity() : base(false, ResourceType.Service)
@@ -1700,7 +1700,7 @@ Outputs Win32_Service or Win32_SystemDriver instances both of which derive from 
         #>
 
         # Helper function code used supply ACL information Get-CSService when Get-CSService -IncludeAcl is used.
-        # The pure reflection version of the above C# code:
+        # The pure reflection version of the above C# code: 
         function Local:Get-ServiceSecurityType {
             [OutputType('CimSweep.ServiceSecurity')]
             param ()

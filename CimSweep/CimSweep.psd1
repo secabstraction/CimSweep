@@ -40,6 +40,7 @@ FunctionsToExport = @(
     'Get-CSInstalledAppCompatShimDatabase',
     'Get-CSAppCompatCache',
     'Get-CSUserAssist',
+    'Get-CSRdpSession',
     'Get-CSBitlockerKeyProtector',
     'Get-CSDeviceGuardStatus'
 )

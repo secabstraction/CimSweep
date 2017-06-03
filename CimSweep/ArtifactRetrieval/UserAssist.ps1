@@ -167,7 +167,7 @@ Outputs objects consisting of relevant user assist information. Note: the LastEx
                     Recurse = $true
                 }
     
-                Get-CSRegistryKey @Parameters @CommonArgs | Where-Object { $_.SubKey -like "*Count" } | Get-CSRegistryValue @CommonArgs | ForEach-Object {
+                Get-CSRegistryKey @Parameters @CommonArgs | Where-Object { $_.SubKey -like "*Count" } | Get-CSRegistryValue | ForEach-Object {
                             
                     # Decrypt Rot13 from https://github.com/StackCrash/PoshCiphers
                     # truncated && streamlined algorithm a little
