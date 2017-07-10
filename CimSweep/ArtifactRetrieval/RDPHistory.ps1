@@ -1,15 +1,17 @@
-﻿function Get-CSRdpSession {
+﻿function Get-CSRDPHistory {
 <#
 .SYNOPSIS
 
 Retrieves RDP session history.
 
 Author: Jesse Davis (@secabstraction)
+Props: Brandon Arvanaghi (@arvanaghi) 
+PortedFrom: https://github.com/fireeye/SessionGopher/blob/master/SessionGopher.ps1
 License: BSD 3-Clause
 
 .DESCRIPTION
 
-Get-CSRdpSession retrieves RDP session history information stored in the registry.
+Get-CSRDPHistory retrieves RDP session history information stored in the registry.
 
 .PARAMETER CimSession
 
@@ -17,17 +19,17 @@ Specifies the CIM session to use for this cmdlet. Enter a variable that contains
 
 .EXAMPLE
 
-Get-CSRdpSession
+Get-CSRDPHistory
 
 .EXAMPLE
 
-Get-CSRdpSession -CimSession $CimSession
+Get-CSRDPHistory -CimSession $CimSession
 
 .OUTPUTS
 
 CimSweep.RDPSession
 
-Outputs objects consisting of relevant user assist information. Note: the LastExecutedTime of this object is a UTC datetime string in Round-trip format.
+Outputs objects consisting of relevant RDP session information.
 
 #>
 
@@ -58,7 +60,7 @@ Outputs objects consisting of relevant user assist information. Note: the LastEx
             if (-not $Session.ComputerName) { $ComputerName = 'localhost' }
 
             # Display a progress activity for each CIM session
-            Write-Progress -Id 1 -Activity 'CimSweep - UserAssist sweep' -Status "($($CurrentCIMSession+1)/$($CIMSessionCount)) Current computer: $ComputerName" -PercentComplete (($CurrentCIMSession / $CIMSessionCount) * 100)
+            Write-Progress -Id 1 -Activity 'CimSweep - RDP History sweep' -Status "($($CurrentCIMSession+1)/$($CIMSessionCount)) Current computer: $ComputerName" -PercentComplete (($CurrentCIMSession / $CIMSessionCount) * 100)
             $CurrentCIMSession++
 
             $CommonArgs = @{}
@@ -72,7 +74,6 @@ Outputs objects consisting of relevant user assist information. Note: the LastEx
                 $Parameters = @{
                     Hive = 'HKU'
                     SubKey = "$Sid\Software\Microsoft\Terminal Server Client\Servers"
-                    Recurse = $true
                 }
     
                 Get-CSRegistryKey @Parameters @CommonArgs | Get-CSRegistryValue -ValueName UsernameHint | ForEach-Object {
@@ -93,4 +94,4 @@ Outputs objects consisting of relevant user assist information. Note: the LastEx
     end {}
 }
 
-Export-ModuleMember -Function Get-CSRdpSession
+Export-ModuleMember -Function Get-CSRDPHistory
